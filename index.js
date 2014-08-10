@@ -120,12 +120,12 @@ function isTrackObject(track) {
 }
 
 /**
- * Determine if `track` is a valid streaming URL
+ * Determine if `track` is a valid SoundCloud URL.
  *
  * @param {Object|String} track
  * @return {Boolean}
  */
 
 function isTrackUrl(track) {
-  return typeof track === 'string' && track.indexOf('/api.soundcloud.com/tracks/') > 0;
+  return typeof track === 'string' && track.indexOf('soundcloud.com') > 0;
 }

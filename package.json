@@ -1,6 +1,6 @@
 {
   "name": "sc-stream",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "simple interface for streaming a soundcloud track",
   "main": "index.js",
   "keywords": [
