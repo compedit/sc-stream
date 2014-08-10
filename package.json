@@ -3,9 +3,6 @@
   "version": "0.0.1",
   "description": "simple interface for streaming a soundcloud track",
   "main": "index.js",
-  "scripts": {
-    "test": "jest"
-  },
   "keywords": [
     "soundcloud",
     "stream"
@@ -15,8 +12,5 @@
   "dependencies": {
     "es6-promise": "^1.0.0",
     "require-sdk": "0.0.2"
-  },
-  "devDependencies": {
-    "jest-cli": "^0.1.18"
   }
 }

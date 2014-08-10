@@ -85,6 +85,7 @@ SCStream.prototype.stream = function(track) {
 SCStream.prototype.getTrackInfo = function(trackUrl) {
   return new Promise(function(resolve, reject) {
     sdk(function loadAPI(err, SC) {
+      if (err) reject(err);
       SC.get('/resolve', {url: trackUrl}, resolve);
     });
   });
@@ -101,6 +102,7 @@ SCStream.prototype.getTrackInfo = function(trackUrl) {
 SCStream.prototype.createStream = function(streamUrl) {
   return new Promise(function(resolve, reject) {
     sdk(function loadAPI(err, SC) {
+      if (err) reject(err);
       SC.stream(streamUrl, resolve);
     });
   });
@@ -125,5 +127,5 @@ function isTrackObject(track) {
  */
 
 function isTrackUrl(track) {
-  return typeof track === 'string'; //&& extra stuff later
+  return typeof track === 'string' && track.indexOf('/api.soundcloud.com/tracks/') > 0;
 }
