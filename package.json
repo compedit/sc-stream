@@ -12,5 +12,11 @@
   "dependencies": {
     "es6-promise": "^1.0.0",
     "require-sdk": "0.0.2"
+  },
+  "devDependencies": {
+    "jest-cli": "^0.1.18"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
