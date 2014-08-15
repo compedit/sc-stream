@@ -4,6 +4,7 @@
 
 var requiresdk = require('require-sdk');
 var Promise = require('es6-promise').Promise;
+var utils = require('./lib/utils');
 
 /**
  * Create SoundCloud SDK loader
@@ -56,14 +57,14 @@ SCStream.prototype.authenticateClient = function(clientId) {
 SCStream.prototype.stream = function(track) {
   var _this = this;
   return new Promise(function(resolve, reject) {
-    if (isTrackUrl(track)) {
+    if (utils.isTrackUrl(track)) {
       _this.getTrackInfo(track).then(function(trackInfo) {
         resolve({
           track: trackInfo, 
           stream: _this.createStream(trackInfo.stream_url)
         });
       });
-    } else if (isTrackObject(track)) {
+    } else if (utils.isTrackObject(track)) {
       resolve({
         track: track, 
         stream: _this.createStream(track.stream_url)
@@ -107,25 +108,3 @@ SCStream.prototype.createStream = function(streamUrl) {
     });
   });
 };
-
-/**
- * Determine if `track` is a track object
- *
- * @param {Object|String} track
- * @return {Boolean}
- */
-
-function isTrackObject(track) {
-  return typeof track === 'object' && isTrackUrl(track.stream_url);
-}
-
-/**
- * Determine if `track` is a valid SoundCloud URL.
- *
- * @param {Object|String} track
- * @return {Boolean}
- */
-
-function isTrackUrl(track) {
-  return typeof track === 'string' && track.indexOf('soundcloud.com') > 0;
-}
