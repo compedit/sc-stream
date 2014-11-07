@@ -1,20 +1,31 @@
 {
   "name": "sc-stream",
-  "version": "0.0.3",
-  "description": "simple interface for streaming a soundcloud track",
+  "version": "1.0.0",
+  "description": "simple promise based interface for streaming from soundcloud",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:compedit/sc-stream.git"
+  },
   "keywords": [
+    "stream",
     "soundcloud",
-    "stream"
+    "promise",
+    "browser"
   ],
-  "author": "troy betz",
+  "author": "troy betz <troybetz@gmail.com>",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/compedit/sc-stream/issues"
+  },
+  "homepage": "https://github.com/compedit/sc-stream",
   "dependencies": {
     "promise": "^6.0.1",
     "require-sdk": "0.0.2"
   },
   "devDependencies": {
-    "jest-cli": "^0.1.18"
+    "jest-cli": "^0.1.18",
+    "watchify": "^2.1.1"
   },
   "scripts": {
     "test": "jest",
