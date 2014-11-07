@@ -44,12 +44,24 @@ SCStream.prototype.authenticateClient = function(clientId) {
  * Retrieve a `track`s information and create a stream.
  *
  * @param {String} track url to be played
+ * @param {Boolean} [staggered] return stream as a promise
  * @return {Promise} loaded track information and stream promise
  * @api public
  */
 
-SCStream.prototype.stream = function(track) {
-  return this.getTrackInfo(track).then(this.createStream);
+SCStream.prototype.stream = function(track, staggered) {
+  var _this = this;
+
+  if (staggered) {
+    return this.getTrackInfo(track).then(function(data) {
+      return {
+        data: data,
+        stream: _this.createStream(data, true)
+      };
+    });
+  } else {
+    return this.getTrackInfo(track).then(this.createStream);
+  }
 };
 
 /**
@@ -72,18 +84,17 @@ SCStream.prototype.getTrackInfo = function(track) {
  * Create a new audio stream.
  *
  * @param {Object} track data object
+ * @param {Boolean} [streamOnly] resolve stream by itself
  * @return {Promise}
  * @api public
  */
 
-SCStream.prototype.createStream = function(data) {
+SCStream.prototype.createStream = function(data, streamOnly) {
   return new Promise(function(resolve, reject) {
     sdk(function loadAPI(err) {
       window.SC.stream(data.stream_url, function(stream) {
-        resolve({
-          data: data,
-          stream: stream
-        });
+        var response = streamOnly ? stream : {data: data, stream: stream};
+        resolve(response);
       });
     });
   });

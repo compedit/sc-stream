@@ -87,4 +87,18 @@ describe('SCStream', function() {
         expect(track.stream).toBe('a stream');
       });
   });
+
+  pit('should be able to stagger loading track info & stream', function() {
+    var scstream = new SCStream('sc-client-id');
+
+    return scstream.stream('https://soundcloud.com/baauer/one-touch', true)
+      .then(function(track) {
+        expect(track.data).toEqual({stream_url: 'a streaming url'});
+        expect(track.stream.then).toBeDefined(); // track.stream is a promise
+        return track.stream;
+      })
+      .then(function(stream) {
+        expect(stream).toBe('a stream');
+      });
+  });
 });
