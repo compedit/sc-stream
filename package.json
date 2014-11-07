@@ -18,5 +18,10 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "jest": {
+    "unmockedModulePathPatterns": [
+      "./node_modules/promise"
+    ]
   }
 }

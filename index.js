@@ -2,15 +2,9 @@
  * Module dependencies
  */
 
+var Promise = require('promise');
 var requiresdk = require('require-sdk');
-var Promise = require('es6-promise').Promise;
-var utils = require('./lib/utils');
-
-/**
- * Create SoundCloud SDK loader
- */
-
-var sdk = requiresdk('http://connect.soundcloud.com/sdk.js', 'SC');
+var sdk;
 
 /**
  * Expose SCStream
@@ -28,6 +22,7 @@ module.exports = SCStream;
 
 function SCStream(clientId) {
   if (!(this instanceof SCStream)) return new SCStream(clientId);
+  sdk = requiresdk('http://connect.soundcloud.com/sdk.js', 'SC');
   this.authenticateClient(clientId);
 }
 
@@ -39,72 +34,57 @@ function SCStream(clientId) {
  */
 
 SCStream.prototype.authenticateClient = function(clientId) {
-  sdk(function loadAPI(err, SC) {
+  sdk(function loadAPI(err) {
     if (err) throw new Error('SoundCloud API failed to load');
-    SC.initialize({client_id: clientId});
+    window.SC.initialize({client_id: clientId});
   });
 };
 
 /**
- * Stream a track. Accepts either a SoundCloud streaming url, or preloaded
- * track information.
+ * Retrieve a `track`s information and create a stream.
  *
- * @param {String|Object} track
- * @return {Function} loaded track information and stream promise
+ * @param {String} track url to be played
+ * @return {Promise} loaded track information and stream promise
  * @api public
  */
 
 SCStream.prototype.stream = function(track) {
-  var _this = this;
-  return new Promise(function(resolve, reject) {
-    if (utils.isTrackUrl(track)) {
-      _this.getTrackInfo(track).then(function(trackInfo) {
-        resolve({
-          track: trackInfo, 
-          stream: _this.createStream(trackInfo.stream_url)
-        });
-      });
-    } else if (utils.isTrackObject(track)) {
-      resolve({
-        track: track, 
-        stream: _this.createStream(track.stream_url)
-      });
-    } else {
-      reject(new Error('Invalid track'));
-    }
-  });
+  return this.getTrackInfo(track).then(this.createStream);
 };
 
 /**
- * Retrieve track information for a `trackUrl`
+ * Retrieve track information for `track`.
  *
- * @param {String} trackUrl
- * @return {Function} promise
+ * @param {String} track url to be played
+ * @return {Promise}
  * @api public
  */
 
-SCStream.prototype.getTrackInfo = function(trackUrl) {
+SCStream.prototype.getTrackInfo = function(track) {
   return new Promise(function(resolve, reject) {
-    sdk(function loadAPI(err, SC) {
-      if (err) reject(err);
-      SC.get('/resolve', {url: trackUrl}, resolve);
+    sdk(function loadAPI(err) {
+      window.SC.get('/resolve', {url: track}, resolve);
     });
   });
 };
 
 /**
- * Create a new audio stream
+ * Create a new audio stream.
  *
- * @param {String} streamUrl
- * @return {Function} promise
+ * @param {Object} track data object
+ * @return {Promise}
  * @api public
  */
 
-SCStream.prototype.createStream = function(streamUrl) {
+SCStream.prototype.createStream = function(data) {
   return new Promise(function(resolve, reject) {
-    sdk(function loadAPI(err, SC) {
-      if (err) reject(err);
-      SC.stream(streamUrl, resolve);
+    sdk(function loadAPI(err) {
+      window.SC.stream(data.stream_url, function(stream) {
+        resolve({
+          data: data,
+          stream: stream
+        });
+      });
     });
   });
 };

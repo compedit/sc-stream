@@ -1,40 +1,90 @@
-jest.autoMockOff();
+jest.dontMock('../');
 
-var trackInfo = require('./sample-data');
-var SCStream = require('../');
-var scStream;
+describe('SCStream', function() {
+  var requiresdk = require('require-sdk');
+  var SCStream = require('../');
+  var sdkMock;
 
-describe('creation', function() {
-  it('should register a new SoundCloud API client', function() {
-    var authenticateClient = SCStream.prototype.authenticateClient = jest.genMockFunction();
-    var scStream = new SCStream('test-client-id');
-    expect(authenticateClient).toBeCalledWith('test-client-id');
-  });
-});
-
-describe('.stream', function() {
   beforeEach(function() {
-    scStream = new SCStream('test-client-id');
-  });
 
-  it('should return a promise', function() {
-    expect(typeof scStream.stream(trackInfo).then).toBe('function');
-  });
+    /**
+     * Mock out API loading util
+     */
 
-  it('should call getTrackInfo if track is a URL', function() {
-    var getTrackInfo = SCStream.prototype.getTrackInfo = jest.genMockFunction();
+    sdkMock = jest.genMockFunction().mockImplementation(function(cb) {
+      return cb();
+    });
     
-    scStream.stream(trackInfo.stream_url);
-    expect(getTrackInfo).toBeCalledWith(trackInfo.stream_url);
+    requiresdk.mockImplementation(function(url, cb) {
+      return sdkMock;
+    });
+
+    /**
+     * Mock out SoundCloud API
+     */
+
+    window.SC = {
+      initialize: jest.genMockFunction(),
+
+      get: jest.genMockFunction().mockImplementation(function(u, t, cb) {
+        cb({
+          stream_url: 'a streaming url'
+        });
+      }),
+
+      stream: jest.genMockFunction().mockImplementation(function(url, cb) {
+        cb('a stream');
+      })
+    };
   });
 
-  it('should just resolve with passed in track info if object', function() {
-    var getTrackInfo = SCStream.prototype.getTrackInfo = jest.genMockFunction();
-    var createStream = SCStream.prototype.createStream = jest.genMockFunction();
+  it('should raise an error if the SoundCloud API fails to load', function() {
+    sdkMock.mockImplementation(function(cb) {
+      cb('error');
+    });
 
-    scStream.stream(trackInfo);
-    expect(getTrackInfo).not.toBeCalled();
-    expect(createStream).toBeCalledWith(trackInfo.stream_url);
+    expect((function() {
+      new SCStream();
+    })).toThrow('SoundCloud API failed to load');
+  });
+
+  it('should load the SoundCloud API when initialized', function() {
+    var scstream = new SCStream();
+
+    expect(requiresdk.mock.calls[0][0]).toBe('http://connect.soundcloud.com/sdk.js');
+    expect(requiresdk.mock.calls[0][1]).toBe('SC');
+    expect(sdkMock.mock.calls.length).toBe(1);
+  });
+
+
+  it('should authenticate a new soundcloud client', function() {
+    var scstream = new SCStream('sc-client-id');
+    
+    expect(window.SC.initialize.mock.calls[0][0].client_id).toBe('sc-client-id');
+  });
+
+  it('should retrieve track information', function() {
+    var scstream = new SCStream('sc-client-id');
+
+    scstream.getTrackInfo('https://soundcloud.com/baauer/one-touch');
+
+    expect(window.SC.get.mock.calls[0][1].url).toBe('https://soundcloud.com/baauer/one-touch');
+  });
+
+  it('should create a new audio stream', function() {
+    var scstream = new SCStream('sc-client-id');
+    
+    scstream.createStream({stream_url: 'a streaming url'});    
+    expect(window.SC.stream.mock.calls[0][0]).toBe('a streaming url');
+  });
+
+  pit('should retrieve track info and create a stream', function() {
+    var scstream = new SCStream('sc-client-id');
+
+    return scstream.stream('https://soundcloud.com/baauer/one-touch')
+      .then(function(track) {
+        expect(track.data).toEqual({stream_url: 'a streaming url'});
+        expect(track.stream).toBe('a stream');
+      });
   });
 });
-
