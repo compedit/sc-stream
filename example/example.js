@@ -17,7 +17,7 @@ scstream.stream('https://soundcloud.com/baauer/one-touch')
  * With staggering
  */
 
-scstream.stream('https://soundcloud.com/baauer/one-touch', true)
+scstream.staggerStream('https://soundcloud.com/baauer/one-touch')
   .then(function(track) {
     console.log('receving track data', track.data);
     return track.stream;

@@ -74,7 +74,7 @@ describe('SCStream', function() {
   it('should create a new audio stream', function() {
     var scstream = new SCStream('sc-client-id');
     
-    scstream.createStream({stream_url: 'a streaming url'});    
+    scstream.createStream('a streaming url');    
     expect(window.SC.stream.mock.calls[0][0]).toBe('a streaming url');
   });
 
@@ -91,7 +91,7 @@ describe('SCStream', function() {
   pit('should be able to stagger loading track info & stream', function() {
     var scstream = new SCStream('sc-client-id');
 
-    return scstream.stream('https://soundcloud.com/baauer/one-touch', true)
+    return scstream.staggerStream('https://soundcloud.com/baauer/one-touch')
       .then(function(track) {
         expect(track.data).toEqual({stream_url: 'a streaming url'});
         expect(track.stream.then).toBeDefined(); // track.stream is a promise

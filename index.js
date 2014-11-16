@@ -44,24 +44,32 @@ SCStream.prototype.authenticateClient = function(clientId) {
  * Retrieve a `track`s information and create a stream.
  *
  * @param {String} track url to be played
- * @param {Boolean} [staggered] return stream as a promise
- * @return {Promise} loaded track information and stream promise
+ * @return {Promise} loaded track information and stream
  * @api public
  */
 
-SCStream.prototype.stream = function(track, staggered) {
-  var _this = this;
+SCStream.prototype.stream = function(track) {
+  return this.getTrackInfo(track).then(this.resolveStreamAndData.bind(this));
+};
 
-  if (staggered) {
-    return this.getTrackInfo(track).then(function(data) {
-      return {
-        data: data,
-        stream: _this.createStream(data, true)
-      };
-    });
-  } else {
-    return this.getTrackInfo(track).then(this.createStream);
-  }
+/**
+ * Retrieve a `track`s information first, then create and return
+ * a stream as a promise.
+ *
+ * @param {String} track
+ * @returns {Object}
+ *  - {Object} data
+ *  - {Promise} stream promise
+ */
+
+SCStream.prototype.staggerStream = function(track) {
+  var _this = this;
+  return this.getTrackInfo(track).then(function(data) {
+    return {
+      data: data,
+      stream: _this.createStream(data.stream_url)
+    };
+  });
 };
 
 /**
@@ -69,7 +77,7 @@ SCStream.prototype.stream = function(track, staggered) {
  *
  * @param {String} track url to be played
  * @return {Promise}
- * @api public
+ * @api private
  */
 
 SCStream.prototype.getTrackInfo = function(track) {
@@ -81,21 +89,31 @@ SCStream.prototype.getTrackInfo = function(track) {
 };
 
 /**
- * Create a new audio stream.
+ * Create a new `stream` using a track `data` object, then return both.
  *
- * @param {Object} track data object
- * @param {Boolean} [streamOnly] resolve stream by itself
- * @return {Promise}
- * @api public
+ * @param {Object} data track object
+ * @returns {Promise}
+ * @api private
  */
 
-SCStream.prototype.createStream = function(data, streamOnly) {
+SCStream.prototype.resolveStreamAndData = function(data) {
+  return this.createStream(data.stream_url).then(function(stream) {
+    return {data: data, stream: stream};
+  });
+};
+
+/**
+ * Create a new audio stream.
+ *
+ * @param {String} streamUrl
+ * @return {Promise}
+ * @api private
+ */
+
+SCStream.prototype.createStream = function(streamUrl) {
   return new Promise(function(resolve, reject) {
     sdk(function loadAPI(err) {
-      window.SC.stream(data.stream_url, function(stream) {
-        var response = streamOnly ? stream : {data: data, stream: stream};
-        resolve(response);
-      });
+      window.SC.stream(streamUrl, resolve);
     });
   });
 };
