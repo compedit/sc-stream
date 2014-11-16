@@ -1,6 +1,6 @@
 {
   "name": "sc-stream",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "simple promise based interface for streaming from soundcloud",
   "main": "index.js",
   "repository": {
