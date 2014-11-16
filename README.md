@@ -1,6 +1,6 @@
 # sc-stream
 
-Stream a SoundCloud track.
+simple promise based interface for streaming from soundcloud
 
 ## Features
 - simple streaming
