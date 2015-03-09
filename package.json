@@ -24,17 +24,25 @@
     "require-sdk": "0.0.2"
   },
   "devDependencies": {
+    "babel-core": "^4.7.4",
     "babel-jest": "^4.0.0",
-    "jest-cli": "^0.4.0"
+    "babel-loader": "^4.1.0",
+    "jest-cli": "^0.4.0",
+    "webpack": "^1.7.2",
+    "webpack-dev-server": "^1.7.0"
   },
   "scripts": {
     "test": "jest",
-    "example": "watchify example/example.js -o example/bundle.js"
+    "start": "webpack-dev-server --config example/webpack.config.js"
   },
   "jest": {
     "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-    "testFileExtensions": ["js"],
-    "moduleFileExtensions": ["js"],
+    "testFileExtensions": [
+      "js"
+    ],
+    "moduleFileExtensions": [
+      "js"
+    ],
     "unmockedModulePathPatterns": [
       "./node_modules/promise"
     ],

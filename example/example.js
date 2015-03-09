@@ -1,27 +1,29 @@
-var SCStream = require('../');
-var Promise = require('promise');
+/**
+ * Module dependencies
+ */
 
-var scstream = new SCStream('5e687b50ccc60566b71bc47a42a2b169');
+const SCStream = require('../');
+const Promise = require('promise');
+
+const scstream = new SCStream('5e687b50ccc60566b71bc47a42a2b169');
 
 /**
  * Without staggering
  */
 
-scstream.stream('https://soundcloud.com/baauer/one-touch')
-  .then(function(track) {
-    console.log('received track', track.data);
-    console.log('received stream', track.stream);
-  });
+scstream.stream('https://soundcloud.com/baauer/one-touch').then((track) => {
+  console.log('[regular] - received track:', track);
+});
 
 /**
  * With staggering
  */
 
 scstream.staggerStream('https://soundcloud.com/baauer/one-touch')
-  .then(function(track) {
-    console.log('receving track data', track.data);
+  .then((track) => {
+    console.log('[staggered] - received data:', track.data);
     return track.stream;
   })
-  .then(function(stream) {
-    console.log('receiving track stream', stream);
+  .then((stream) => {
+    console.log('[staggered] - received stream:', stream);
   });
