@@ -54,13 +54,15 @@ describe('SCStream', () => {
     expect(window.SC.initialize.mock.calls[0][0].client_id).toBe('sc-client-id');
   });
 
+  // refactor, should not be accessing private method
   it('should retrieve track information', () => {
-    scstream.getTrackInfo('https://soundcloud.com/baauer/one-touch');
+    scstream._getTrackInfo('https://soundcloud.com/baauer/one-touch');
     expect(window.SC.get.mock.calls[0][1].url).toBe('https://soundcloud.com/baauer/one-touch');
   });
 
+  // refactor, should not be accessing private method
   it('should create a new audio stream', () => {
-    scstream.createStream('a streaming url');
+    scstream._createStream('a streaming url');
     expect(window.SC.stream.mock.calls[0][0]).toBe('a streaming url');
   });
 

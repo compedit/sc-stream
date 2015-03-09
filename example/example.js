@@ -2,8 +2,7 @@
  * Module dependencies
  */
 
-const SCStream = require('../');
-const Promise = require('promise');
+import SCStream from '../';
 
 const scstream = new SCStream('5e687b50ccc60566b71bc47a42a2b169');
 

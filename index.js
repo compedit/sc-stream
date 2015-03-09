@@ -2,118 +2,115 @@
  * Module dependencies
  */
 
-var Promise = require('promise');
-var requiresdk = require('require-sdk');
-var sdk;
+import Promise from 'promise';
+import requiresdk from 'require-sdk';
 
 /**
- * Expose SCStream
+ * Create new `SCStream`
  */
 
-module.exports = SCStream;
+export default class SCStream {
 
+  /**
+   * Constuct a new `SCStream` and authenticate with SoundCloud API
+   *
+   * @param {String} clientId
+   */
 
-/**
- * Initialize a new `SCStream` instance and authenticate with SoundCloud API
- *
- * @param {String} clientId
- * @api public
- */
+  constructor(clientId) {
+    this.sdk = requiresdk('http://connect.soundcloud.com/sdk.js', 'SC');
+    this._authenticate(clientId);
+  }
 
-function SCStream(clientId) {
-  if (!(this instanceof SCStream)) return new SCStream(clientId);
-  sdk = requiresdk('http://connect.soundcloud.com/sdk.js', 'SC');
-  this.authenticateClient(clientId);
+  /**
+   * Retrieve a `track`s information and create a stream.
+   *
+   * @param {String} track url to be played
+   * @return {Promise} loaded track information and stream
+   * @api public
+   */
+
+  stream(track) {
+    return this._getTrackInfo(track).then(this._resolveStreamAndData.bind(this));
+  }
+
+  /**
+   * Retrieve a `track`s information first, then create and return
+   * a stream as a promise.
+   *
+   * @param {String} track
+   * @returns {Object}
+   *  - {Object} data
+   *  - {Promise} stream promise
+   * @api public
+   */
+
+  staggerStream(track) {
+    return this._getTrackInfo(track).then((data) => {
+      return {
+        data: data,
+        stream: this._createStream(data.stream_url)
+      };
+    });
+  }
+
+  /**
+   * Register a new SoundCloud API `clientId`. Required for retrieving track information.
+   *
+   * @param {String} clientId
+   * @api private
+   */
+
+  _authenticate(clientId) {
+    this.sdk((err) => {
+      if (err) throw new Error('SoundCloud API failed to load');
+      window.SC.initialize({client_id: clientId});
+    });
+  }
+
+  /**
+   * Retrieve track information for `track`.
+   *
+   * @param {String} track url to be played
+   * @return {Promise}
+   * @api private
+   */
+
+  _getTrackInfo(track) {
+    return new Promise((resolve, reject) => {
+      this.sdk((err) =>{
+        window.SC.get('/resolve', {url: track}, resolve);
+      });
+    });
+  }
+
+  /**
+   * Create a new `stream` using a track `data` object, then return both.
+   *
+   * @param {Object} data track object
+   * @returns {Promise}
+   * @api private
+   */
+
+  _resolveStreamAndData(data) {
+    return this._createStream(data.stream_url).then((stream) => {
+      return {data: data, stream: stream};
+    });
+  }
+
+  /**
+   * Create a new audio stream.
+   *
+   * @param {String} streamUrl
+   * @return {Promise}
+   * @api private
+   */
+
+  _createStream(streamUrl) {
+    return new Promise((resolve, reject) => {
+      this.sdk((err) =>{
+        window.SC.stream(streamUrl, resolve);
+      });
+    });
+  }
 }
-
-/**
- * Register a new SoundCloud API `clientId`. Required for retrieving track information.
- *
- * @param {String} clientId
- * @api private
- */
-
-SCStream.prototype.authenticateClient = function(clientId) {
-  sdk(function loadAPI(err) {
-    if (err) throw new Error('SoundCloud API failed to load');
-    window.SC.initialize({client_id: clientId});
-  });
-};
-
-/**
- * Retrieve a `track`s information and create a stream.
- *
- * @param {String} track url to be played
- * @return {Promise} loaded track information and stream
- * @api public
- */
-
-SCStream.prototype.stream = function(track) {
-  return this.getTrackInfo(track).then(this.resolveStreamAndData.bind(this));
-};
-
-/**
- * Retrieve a `track`s information first, then create and return
- * a stream as a promise.
- *
- * @param {String} track
- * @returns {Object}
- *  - {Object} data
- *  - {Promise} stream promise
- */
-
-SCStream.prototype.staggerStream = function(track) {
-  var _this = this;
-  return this.getTrackInfo(track).then(function(data) {
-    return {
-      data: data,
-      stream: _this.createStream(data.stream_url)
-    };
-  });
-};
-
-/**
- * Retrieve track information for `track`.
- *
- * @param {String} track url to be played
- * @return {Promise}
- * @api private
- */
-
-SCStream.prototype.getTrackInfo = function(track) {
-  return new Promise(function(resolve, reject) {
-    sdk(function loadAPI(err) {
-      window.SC.get('/resolve', {url: track}, resolve);
-    });
-  });
-};
-
-/**
- * Create a new `stream` using a track `data` object, then return both.
- *
- * @param {Object} data track object
- * @returns {Promise}
- * @api private
- */
-
-SCStream.prototype.resolveStreamAndData = function(data) {
-  return this.createStream(data.stream_url).then(function(stream) {
-    return {data: data, stream: stream};
-  });
-};
-
-/**
- * Create a new audio stream.
- *
- * @param {String} streamUrl
- * @return {Promise}
- * @api private
- */
-
-SCStream.prototype.createStream = function(streamUrl) {
-  return new Promise(function(resolve, reject) {
-    sdk(function loadAPI(err) {
-      window.SC.stream(streamUrl, resolve);
-    });
-  });
-};
